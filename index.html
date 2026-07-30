@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Documentos oftalmológicos</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="shell header-inner">
+      <img src="../logo hospital.png" alt="Hospital da Visão" class="brand-logo">
+      <div class="header-title">
+        <h1>Documentos oftalmológicos</h1>
+        <p>Dr. Gustavo Garcia · CRM 7669-GO</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="patient-band" aria-labelledby="patient-heading">
+      <div class="shell">
+        <h2 id="patient-heading">Paciente</h2>
+        <div class="patient-fields">
+          <label class="field patient-name-field">
+            <span>Nome do paciente</span>
+            <input id="patient-name" name="patient-name" autocomplete="off" placeholder="Nome completo">
+          </label>
+          <fieldset class="gender-field">
+            <legend>Sexo</legend>
+            <div class="segmented-control">
+              <label><input type="radio" name="gender" value="male"><span>Homem</span></label>
+              <label><input type="radio" name="gender" value="female"><span>Mulher</span></label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </section>
+
+    <div class="shell workspace">
+      <section aria-labelledby="templates-heading">
+        <div class="section-heading">
+          <div>
+            <h2 id="templates-heading">Documentos</h2>
+            <p id="selection-status" aria-live="polite">Nenhum documento selecionado</p>
+          </div>
+        </div>
+        <div id="template-groups"></div>
+      </section>
+
+      <section id="specific-fields" class="specific-fields" aria-labelledby="details-heading" hidden>
+        <div class="section-heading">
+          <div>
+            <h2 id="details-heading">Dados dos documentos</h2>
+            <p>Campos específicos da seleção atual</p>
+          </div>
+        </div>
+        <div id="fields-container"></div>
+      </section>
+
+      <div id="validation-errors" class="validation-errors" role="alert" hidden></div>
+    </div>
+  </main>
+
+  <footer class="action-bar">
+    <div class="shell action-inner">
+      <span id="action-summary">Selecione os documentos</span>
+      <button id="review-button" class="button button-primary" type="button" disabled>
+        <i data-lucide="eye" aria-hidden="true"></i>
+        <span>Revisar documentos</span>
+      </button>
+    </div>
+  </footer>
+
+  <dialog id="review-dialog" aria-labelledby="review-title">
+    <div class="review-shell">
+      <header class="review-header">
+        <div>
+          <p class="eyebrow">Etapa final</p>
+          <h2 id="review-title">Revisão dos documentos</h2>
+        </div>
+        <button id="close-review" class="icon-button" type="button" aria-label="Fechar revisão" title="Fechar revisão">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+      </header>
+      <div id="review-tabs" class="review-tabs" role="tablist" aria-label="Documentos selecionados"></div>
+      <div class="review-stage">
+        <div id="review-pages"></div>
+      </div>
+      <footer class="review-actions">
+        <span id="review-count"></span>
+        <div class="review-buttons">
+          <button id="export-word" class="button button-secondary" type="button">
+            <i data-lucide="file-text" aria-hidden="true"></i><span>Gerar Word</span>
+          </button>
+          <button id="export-pdf" class="button button-secondary" type="button">
+            <i data-lucide="file-down" aria-hidden="true"></i><span>Gerar PDF</span>
+          </button>
+          <button id="print-documents" class="button button-primary" type="button">
+            <i data-lucide="printer" aria-hidden="true"></i><span>Imprimir</span>
+          </button>
+        </div>
+      </footer>
+    </div>
+  </dialog>
+
+  <div id="print-root" aria-hidden="true"></div>
+
+  <script src="vendor/lucide.min.js"></script>
+  <script src="vendor/docx.js"></script>
+  <script src="vendor/pdf-lib.min.js"></script>
+  <script src="src/core.js"></script>
+  <script src="src/templates.js"></script>
+  <script src="src/exporters.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
