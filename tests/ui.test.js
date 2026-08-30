@@ -6,6 +6,13 @@ const { chromium } = require('playwright');
 
 const appUrl = pathToFileURL(path.resolve(__dirname, '..', 'index.html')).href;
 
+async function signIn(page) {
+  await page.getByLabel('CRM').fill('7669-GO');
+  await page.getByLabel('Senha').fill('gabereis');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('heading', { name: 'Documentos oftalmológicos' }).waitFor();
+}
+
 async function withPage(run, viewport = { width: 1280, height: 900 }) {
   const browser = await chromium.launch({
     headless: true,
@@ -27,16 +34,57 @@ async function withPage(run, viewport = { width: 1280, height: 900 }) {
   }
 }
 
+test('requires a basic CRM login before showing the dashboard', async () => {
+  await withPage(async (page) => {
+    await page.getByRole('heading', { name: 'Acesso ao dashboard' }).waitFor();
+    assert.equal(await page.locator('#app-shell').isVisible(), false);
+
+    await signIn(page);
+
+    assert.equal(await page.locator('#app-shell').isVisible(), true);
+    assert.equal(await page.locator('#login-shell').isVisible(), false);
+  });
+});
+
+test('rejects invalid CRM credentials without storing login state', async () => {
+  await withPage(async (page) => {
+    await page.getByLabel('CRM').fill('0000-GO');
+    await page.getByLabel('Senha').fill('errada');
+    await page.getByRole('button', { name: 'Entrar' }).click();
+
+    const alert = page.getByRole('alert');
+    await alert.waitFor();
+    assert.match(await alert.textContent(), /CRM ou senha inválidos/i);
+    assert.equal(await page.locator('#app-shell').isVisible(), false);
+
+    const stored = await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length, cookies: document.cookie }));
+    assert.deepEqual(stored, { local: 0, session: 0, cookies: '' });
+  });
+});
+
 test('renders all models grouped into four themes', async () => {
   await withPage(async (page) => {
-    await page.getByRole('heading', { name: 'Documentos oftalmológicos' }).waitFor();
+    await signIn(page);
     assert.equal(await page.locator('[data-template-id]').count(), 12);
     assert.equal(await page.locator('.template-group').count(), 4);
   });
 });
 
+test('loads the local hospital logo from bundled assets', async () => {
+  await withPage(async (page) => {
+    await signIn(page);
+    const logo = page.locator('.brand-logo');
+    await logo.waitFor();
+    const source = await logo.getAttribute('src');
+    const loaded = await logo.evaluate((image) => image.complete && image.naturalWidth > 0);
+    assert.equal(source, 'assets/logo hospital.png');
+    assert.equal(loaded, true);
+  });
+});
+
 test('opens a required review with one tab per selected document', async () => {
   await withPage(async (page) => {
+    await signIn(page);
     await page.getByLabel('Nome do paciente').fill('Carlos Souza');
     await page.getByText('Homem', { exact: true }).click();
     await page.locator('[data-template-id="cardiologist-letter"] input[type="checkbox"]').check();
@@ -55,6 +103,7 @@ test('opens a required review with one tab per selected document', async () => {
 
 test('uses Times New Roman only on document review pages and centers the signature', async () => {
   await withPage(async (page) => {
+    await signIn(page);
     await page.getByLabel('Nome do paciente').fill('Carlos Souza');
     await page.getByText('Homem', { exact: true }).click();
     await page.locator('[data-template-id="cardiologist-letter"] input[type="checkbox"]').check();
@@ -72,6 +121,7 @@ test('uses Times New Roman only on document review pages and centers the signatu
 
 test('shows validation without opening review when required fields are missing', async () => {
   await withPage(async (page) => {
+    await signIn(page);
     await page.locator('[data-template-id="oct-glaucoma"] input[type="checkbox"]').check();
     await page.getByRole('button', { name: 'Revisar 1 documento' }).click();
     const alert = page.getByRole('alert');
@@ -83,6 +133,7 @@ test('shows validation without opening review when required fields are missing',
 
 test('keeps patient data out of browser storage', async () => {
   await withPage(async (page) => {
+    await signIn(page);
     await page.getByLabel('Nome do paciente').fill('Paciente Sigiloso');
     const stored = await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length, cookies: document.cookie }));
     assert.deepEqual(stored, { local: 0, session: 0, cookies: '' });
@@ -91,6 +142,7 @@ test('keeps patient data out of browser storage', async () => {
 
 test('fits the primary workflow on a 320px viewport without horizontal overflow', async () => {
   await withPage(async (page) => {
+    await signIn(page);
     const dimensions = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
@@ -102,6 +154,7 @@ test('fits the primary workflow on a 320px viewport without horizontal overflow'
 
 test('downloads combined Word and PDF files from the review dialog', async () => {
   await withPage(async (page) => {
+    await signIn(page);
     await page.locator('[data-template-id="dacryoscintigraphy-locations"] input[type="checkbox"]').check();
     await page.getByRole('button', { name: 'Revisar 1 documento' }).click();
     const dialog = page.getByRole('dialog', { name: 'Revisão dos documentos' });
@@ -121,6 +174,7 @@ test('downloads combined Word and PDF files from the review dialog', async () =>
 
 test('prepares one printable A4 article per reviewed document', async () => {
   await withPage(async (page) => {
+    await signIn(page);
     await page.locator('[data-template-id="dacryoscintigraphy-locations"] input[type="checkbox"]').check();
     await page.locator('[data-template-id="compounding-pharmacies"] input[type="checkbox"]').check();
     await page.getByRole('button', { name: 'Revisar 2 documentos' }).click();

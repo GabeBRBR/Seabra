@@ -4,17 +4,43 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+  <meta name="app-version" content="R01">
   <title>Documentos oftalmológicos</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
+  <section id="login-shell" class="login-shell" aria-labelledby="login-title">
+    <form id="login-form" class="login-panel" autocomplete="off" novalidate>
+      <img src="assets/logo hospital.png" alt="Hospital da Visão" class="login-logo">
+      <div>
+        <p class="eyebrow">Acesso restrito</p>
+        <h1 id="login-title">Acesso ao dashboard</h1>
+      </div>
+      <label class="field" for="login-crm">
+        <span>CRM</span>
+        <input id="login-crm" name="crm" autocomplete="off" inputmode="text" required>
+      </label>
+      <label class="field" for="login-password">
+        <span>Senha</span>
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <p id="login-error" class="login-error" role="alert" hidden></p>
+      <button class="button button-primary" type="submit">
+        <i data-lucide="log-in" aria-hidden="true"></i>
+        <span>Entrar</span>
+      </button>
+    </form>
+  </section>
+
+  <div id="app-shell" hidden>
   <header class="app-header">
     <div class="shell header-inner">
-      <img src="../logo hospital.png" alt="Hospital da Visão" class="brand-logo">
+      <img src="assets/logo hospital.png" alt="Hospital da Visão" class="brand-logo">
       <div class="header-title">
         <h1>Documentos oftalmológicos</h1>
         <p>Dr. Gustavo Garcia · CRM 7669-GO</p>
       </div>
+      <span class="version-badge" aria-label="Versão R01">R01</span>
     </div>
   </header>
 
@@ -106,6 +132,7 @@
   </dialog>
 
   <div id="print-root" aria-hidden="true"></div>
+  </div>
 
   <script src="vendor/lucide.min.js"></script>
   <script src="vendor/docx.js"></script>

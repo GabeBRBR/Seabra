@@ -35,6 +35,12 @@
     pages: document.getElementById('review-pages'),
     reviewCount: document.getElementById('review-count'),
     printRoot: document.getElementById('print-root'),
+    loginShell: document.getElementById('login-shell'),
+    appShell: document.getElementById('app-shell'),
+    loginForm: document.getElementById('login-form'),
+    loginCrm: document.getElementById('login-crm'),
+    loginPassword: document.getElementById('login-password'),
+    loginError: document.getElementById('login-error'),
   };
 
   function escapeHtml(value) {
@@ -164,6 +170,34 @@
     elements.errors.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
+  function clearLoginError() {
+    elements.loginError.hidden = true;
+    elements.loginError.textContent = '';
+  }
+
+  function showDashboard() {
+    elements.loginShell.hidden = true;
+    elements.appShell.hidden = false;
+    document.body.classList.add('is-authenticated');
+    elements.patientName.focus();
+  }
+
+  function handleLogin(event) {
+    event.preventDefault();
+    const crm = elements.loginCrm.value.trim().toUpperCase();
+    const password = elements.loginPassword.value;
+    if (crm === '7669-GO' && password === 'gabereis') {
+      elements.loginPassword.value = '';
+      clearLoginError();
+      showDashboard();
+      return;
+    }
+    elements.loginPassword.value = '';
+    elements.loginError.textContent = 'CRM ou senha inválidos.';
+    elements.loginError.hidden = false;
+    elements.loginCrm.focus();
+  }
+
   function createEditableBlock(documentId, block, blockIndex) {
     const attributes = `contenteditable="plaintext-only" spellcheck="true" data-document-id="${documentId}" data-block-index="${blockIndex}"`;
     if (block.type === 'heading') {
@@ -231,6 +265,9 @@
   }
 
   elements.patientName.addEventListener('input', () => { state.patientName = elements.patientName.value; clearErrors(); });
+  elements.loginForm.addEventListener('submit', handleLogin);
+  elements.loginCrm.addEventListener('input', clearLoginError);
+  elements.loginPassword.addEventListener('input', clearLoginError);
   document.querySelectorAll('input[name="gender"]').forEach((input) => input.addEventListener('change', () => { state.gender = input.value; clearErrors(); }));
   elements.reviewButton.addEventListener('click', openReview);
   document.getElementById('close-review').addEventListener('click', () => elements.dialog.close());
